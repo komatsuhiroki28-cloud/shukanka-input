@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>習慣ログ</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="習慣ログ">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0a'/%3E%3Ctext x='90' y='120' font-size='90' text-anchor='middle' fill='%2300e5a0' font-family='sans-serif' font-weight='bold'%3E%CF%86%3C/text%3E%3C/svg%3E">
+<style>
+  :root{--bg:#0a0a0a;--panel:#151515;--line:#262626;--txt:#ededed;--dim:#8a8a8a;--accent:#00e5a0;--warn:#ff5a5a;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+    padding:max(20px,env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));min-height:100vh;}
+  header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+  h1{font-size:20px;margin:0;letter-spacing:.02em;}
+  h1 span{color:var(--accent);}
+  .date{color:var(--dim);font-size:14px;font-variant-numeric:tabular-nums;}
+  .gear{background:none;border:none;color:var(--dim);font-size:20px;padding:6px;cursor:pointer;}
+  label{display:block;font-size:13px;color:var(--dim);margin:18px 0 7px;}
+  input[type=time],input[type=number],input[type=text],input[type=password]{
+    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    color:var(--txt);font-size:19px;padding:14px 14px;outline:none;font-variant-numeric:tabular-nums;}
+  input:focus{border-color:var(--accent);}
+  .seg{display:flex;gap:8px;}
+  .seg button{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    color:var(--txt);font-size:22px;padding:13px 0;cursor:pointer;transition:.12s;}
+  .seg button.on{border-color:var(--accent);background:rgba(0,229,160,.12);}
+  .score{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;}
+  .score button{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--txt);
+    font-size:16px;padding:12px 0;cursor:pointer;font-variant-numeric:tabular-nums;}
+  .score button.on{border-color:var(--accent);background:rgba(0,229,160,.12);color:var(--accent);font-weight:700;}
+  #submit{width:100%;margin-top:28px;background:var(--accent);color:#062;border:none;border-radius:14px;
+    font-size:18px;font-weight:700;padding:17px;cursor:pointer;letter-spacing:.03em;}
+  #submit:disabled{opacity:.5;}
+  #msg{margin-top:16px;text-align:center;font-size:14px;min-height:20px;}
+  #msg.ok{color:var(--accent);} #msg.err{color:var(--warn);}
+  dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:16px;
+    width:90%;max-width:360px;padding:20px;}
+  dialog::backdrop{background:rgba(0,0,0,.6);}
+  dialog p{color:var(--dim);font-size:13px;line-height:1.5;}
+  dialog .row{display:flex;gap:8px;margin-top:14px;}
+  dialog button{flex:1;border-radius:10px;padding:12px;font-size:15px;border:1px solid var(--line);
+    background:var(--bg);color:var(--txt);cursor:pointer;}
+  dialog button.primary{background:var(--accent);color:#062;border:none;font-weight:700;}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>習慣<span>ログ</span></h1></div>
+  <button class="gear" id="gear" aria-label="設定">⚙</button>
+</header>
+<div class="date" id="dateLbl"></div>
+
+<label>起床時刻</label>
+<input type="time" id="wake">
+
+<label>体重</label>
+<input type="number" id="weight" inputmode="decimal" step="0.1" placeholder="94.7">
+
+<label>歩数</label>
+<input type="number" id="steps" inputmode="numeric" placeholder="8000">
+
+<label>ジム</label>
+<div class="seg" id="gym">
+  <button data-v="✅">✅</button><button data-v="⛔">⛔</button><button data-v="🛌">🛌</button>
+</div>
+
+<label>簿記</label>
+<div class="seg" id="boki">
+  <button data-v="✅">✅</button><button data-v="⛔">⛔</button><button data-v="🛌">🛌</button>
+</div>
+
+<label>没頭スコア（1-10）</label>
+<div class="score" id="score"></div>
+
+<button id="submit">送信してcommit</button>
+<div id="msg"></div>
+
+<dialog id="cfg">
+  <h3 style="margin:0 0 4px">GitHubトークン設定</h3>
+  <p>Fine-grained PAT（repo=shukanka-system / Contents=Read and write）を貼り付け。この端末のブラウザ内にのみ保存されます。</p>
+  <input type="password" id="pat" placeholder="github_pat_..." autocomplete="off">
+  <div class="row">
+    <button id="cfgCancel">閉じる</button>
+    <button class="primary" id="cfgSave">保存</button>
+  </div>
+</dialog>
+
+<script>
+const OWNER="komatsuhiroki28-cloud", REPO="shukanka-system";
+const $=s=>document.querySelector(s);
+const state={gym:null,boki:null,score:null};
+
+// 日付
+const now=new Date();
+const pad=n=>String(n).padStart(2,'0');
+const dateStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+$("#dateLbl").textContent=dateStr;
+
+// 没頭スコア 1-10 生成
+const sc=$("#score");
+for(let i=1;i<=10;i++){const b=document.createElement("button");b.textContent=i;b.dataset.v=i;sc.appendChild(b);}
+
+// セグメント選択
+function bindSeg(id,key){
+  document.querySelectorAll(`#${id} button`).forEach(b=>{
+    b.onclick=()=>{document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on"));
+      b.classList.add("on");state[key]=b.dataset.v;};
+  });
+}
+bindSeg("gym","gym");bindSeg("boki","boki");bindSeg("score","score");
+
+// 設定ダイアログ
+$("#gear").onclick=()=>{$("#pat").value=localStorage.getItem("pat")||"";$("#cfg").showModal();};
+$("#cfgCancel").onclick=()=>$("#cfg").close();
+$("#cfgSave").onclick=()=>{localStorage.setItem("pat",$("#pat").value.trim());$("#cfg").close();toast("トークンを保存","ok");};
+
+function toast(t,cls){const m=$("#msg");m.textContent=t;m.className=cls||"";}
+function b64(str){return btoa(String.fromCharCode(...new TextEncoder().encode(str)));}
+
+$("#submit").onclick=async()=>{
+  const token=(localStorage.getItem("pat")||"").trim();
+  if(!token){toast("先に⚙でトークンを設定してください","err");$("#cfg").showModal();return;}
+  const wake=$("#wake").value, weight=$("#weight").value, steps=$("#steps").value;
+  if(!wake||!weight||!steps||!state.gym||!state.boki||!state.score){
+    toast("未入力の項目があります","err");return;}
+  const line=`${dateStr} | ${wake} | ${weight} | ${steps} | ${state.gym} | ${state.boki} | ${state.score}`;
+  const path=`logs/${dateStr}.txt`;
+  const api=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+  const H={Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  $("#submit").disabled=true;toast("送信中…","");
+  try{
+    // 既存確認（同日再送で上書きするため sha を取得）
+    let sha;
+    const g=await fetch(api,{headers:H});
+    if(g.status===200){sha=(await g.json()).sha;}
+    const r=await fetch(api,{method:"PUT",headers:H,
+      body:JSON.stringify({message:`log ${dateStr}`,content:b64(line),...(sha?{sha}:{})})});
+    if(r.ok){toast(sha?"上書き完了 ✅":"commit完了 ✅","ok");}
+    else{const e=await r.json();toast("失敗: "+(e.message||r.status),"err");}
+  }catch(e){toast("通信エラー: "+e.message,"err");}
+  finally{$("#submit").disabled=false;}
+};
+</script>
+</body>
+</html>
