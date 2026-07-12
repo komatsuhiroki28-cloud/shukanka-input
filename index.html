@@ -130,7 +130,7 @@
 <script>
 const OWNER="komatsuhiroki28-cloud", REPO="shukanka-system";
 const DATA_OWNER=OWNER, DATA_REPO=REPO;
-const WEIGHT_START=96, WEIGHT_GOAL=78, GOAL_DATE="2026-12-06"; // 12月大会
+const WEIGHT_START=96, WEIGHT_GOAL=78, GOAL_DATE="2026-11-21"; // 大会 11/21
 const $=s=>document.querySelector(s);
 const state={gym:null,boki:null,score:null};
 
@@ -270,7 +270,7 @@ function renderKpi(entries){
     }
     bodyCard=`
     <div class="kpi-card">
-      <div class="kpi-head"><div class="t">💪 肉体資本</div><div class="tag">12月大会</div></div>
+      <div class="kpi-head"><div class="t">💪 肉体資本</div><div class="tag">11/21大会</div></div>
       <div class="big">${cur.toFixed(1)}<small>kg / 目標 ${WEIGHT_GOAL}</small></div>
       <div class="bar"><i style="width:${prog.toFixed(1)}%"></i></div>
       <div class="row">
