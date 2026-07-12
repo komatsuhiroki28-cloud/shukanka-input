@@ -10,16 +10,20 @@
 <meta name="theme-color" content="#0a0a0a">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230a0a0a'/%3E%3Ctext x='90' y='120' font-size='90' text-anchor='middle' fill='%2300e5a0' font-family='sans-serif' font-weight='bold'%3E%CF%86%3C/text%3E%3C/svg%3E">
 <style>
-  :root{--bg:#0a0a0a;--panel:#151515;--line:#262626;--txt:#ededed;--dim:#8a8a8a;--accent:#00e5a0;--warn:#ff5a5a;}
+  :root{--bg:#0a0a0a;--panel:#151515;--panel2:#1c1c1c;--line:#262626;--txt:#ededed;--dim:#8a8a8a;--accent:#00e5a0;--warn:#ff5a5a;--amber:#ffb454;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
-    padding:max(20px,env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));min-height:100vh;}
-  header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+    padding:max(18px,env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));min-height:100vh;}
+  header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
   h1{font-size:20px;margin:0;letter-spacing:.02em;}
   h1 span{color:var(--accent);}
-  .date{color:var(--dim);font-size:14px;font-variant-numeric:tabular-nums;}
   .gear{background:none;border:none;color:var(--dim);font-size:20px;padding:6px;cursor:pointer;}
-  label{display:block;font-size:13px;color:var(--dim);margin:18px 0 7px;}
+  /* tabs */
+  .tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:16px;}
+  .tabs button{flex:1;background:none;border:none;color:var(--dim);font-size:15px;font-weight:600;padding:10px;border-radius:9px;cursor:pointer;}
+  .tabs button.on{background:var(--accent);color:#062;}
+  .date{color:var(--dim);font-size:14px;font-variant-numeric:tabular-nums;margin-bottom:4px;}
+  label{display:block;font-size:13px;color:var(--dim);margin:16px 0 7px;}
   input[type=time],input[type=number],input[type=text],input[type=password]{
     width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;
     color:var(--txt);font-size:19px;padding:14px 14px;outline:none;font-variant-numeric:tabular-nums;}
@@ -32,61 +36,92 @@
   .score button{background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--txt);
     font-size:16px;padding:12px 0;cursor:pointer;font-variant-numeric:tabular-nums;}
   .score button.on{border-color:var(--accent);background:rgba(0,229,160,.12);color:var(--accent);font-weight:700;}
-  #submit{width:100%;margin-top:28px;background:var(--accent);color:#062;border:none;border-radius:14px;
+  #submit{width:100%;margin-top:26px;background:var(--accent);color:#062;border:none;border-radius:14px;
     font-size:18px;font-weight:700;padding:17px;cursor:pointer;letter-spacing:.03em;}
   #submit:disabled{opacity:.5;}
-  #msg{margin-top:16px;text-align:center;font-size:14px;min-height:20px;}
+  #msg{margin-top:14px;text-align:center;font-size:14px;min-height:20px;}
   #msg.ok{color:var(--accent);} #msg.err{color:var(--warn);}
-  dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:16px;
-    width:90%;max-width:360px;padding:20px;}
+  /* KPI */
+  .kpi-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .kpi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .kpi-head .t{font-size:15px;font-weight:700;}
+  .kpi-head .tag{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:20px;padding:3px 9px;}
+  .big{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
+  .big small{font-size:15px;color:var(--dim);font-weight:600;margin-left:4px;}
+  .bar{height:10px;background:var(--panel2);border-radius:6px;overflow:hidden;margin:12px 0 8px;border:1px solid var(--line);}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#00b37e);border-radius:6px;}
+  .row{display:flex;gap:10px;margin-top:12px;}
+  .stat{flex:1;background:var(--panel2);border-radius:11px;padding:10px 12px;}
+  .stat .k{font-size:11px;color:var(--dim);} .stat .v{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px;}
+  .v.warn{color:var(--warn);} .v.ok{color:var(--accent);} .v.amber{color:var(--amber);}
+  .pace{font-size:12px;margin-top:8px;}
+  .mile{display:flex;align-items:flex-start;gap:11px;padding:9px 0;}
+  .mile .dot{width:11px;height:11px;border-radius:50%;margin-top:4px;flex:none;background:var(--line);}
+  .mile.done .dot{background:var(--accent);} .mile.now .dot{background:var(--amber);box-shadow:0 0 0 4px rgba(255,180,84,.15);}
+  .mile .mt{font-size:14px;font-weight:600;} .mile .md{font-size:12px;color:var(--dim);margin-top:1px;}
+  .muted{color:var(--dim);font-size:13px;text-align:center;padding:30px 0;}
+  dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:16px;width:90%;max-width:360px;padding:20px;}
   dialog::backdrop{background:rgba(0,0,0,.6);}
   dialog p{color:var(--dim);font-size:13px;line-height:1.5;}
-  dialog .row{display:flex;gap:8px;margin-top:14px;}
-  dialog button{flex:1;border-radius:10px;padding:12px;font-size:15px;border:1px solid var(--line);
-    background:var(--bg);color:var(--txt);cursor:pointer;}
+  dialog .drow{display:flex;gap:8px;margin-top:14px;}
+  dialog button{flex:1;border-radius:10px;padding:12px;font-size:15px;border:1px solid var(--line);background:var(--bg);color:var(--txt);cursor:pointer;}
   dialog button.primary{background:var(--accent);color:#062;border:none;font-weight:700;}
 </style>
 </head>
 <body>
 <header>
-  <div><h1>習慣<span>ログ</span></h1></div>
+  <h1>習慣<span>ログ</span></h1>
   <button class="gear" id="gear" aria-label="設定">⚙</button>
 </header>
-<div class="date" id="dateLbl"></div>
 
-<label>起床時刻</label>
-<input type="time" id="wake">
-
-<label>睡眠スコア（0-100）</label>
-<input type="number" id="sleep" inputmode="numeric" placeholder="82">
-
-<label>体重</label>
-<input type="number" id="weight" inputmode="decimal" step="0.1" placeholder="94.7">
-
-<label>歩数</label>
-<input type="number" id="steps" inputmode="numeric" placeholder="8000">
-
-<label>ジム</label>
-<div class="seg" id="gym">
-  <button data-v="✅">✅</button><button data-v="⛔">⛔</button><button data-v="🛌">🛌</button>
+<div class="tabs">
+  <button id="tabInput" class="on">入力</button>
+  <button id="tabKpi">KPI</button>
 </div>
 
-<label>簿記</label>
-<div class="seg" id="boki">
-  <button data-v="✅">✅</button><button data-v="⛔">⛔</button><button data-v="🛌">🛌</button>
-</div>
+<!-- ===== 入力ビュー ===== -->
+<section id="viewInput">
+  <div class="date" id="dateLbl"></div>
 
-<label>没頭スコア（1-10）</label>
-<div class="score" id="score"></div>
+  <label>起床時刻</label>
+  <input type="time" id="wake">
 
-<button id="submit">送信してcommit</button>
-<div id="msg"></div>
+  <label>睡眠スコア（0-100）</label>
+  <input type="number" id="sleep" inputmode="numeric" placeholder="82">
+
+  <label>体重</label>
+  <input type="number" id="weight" inputmode="decimal" step="0.1" placeholder="94.7">
+
+  <label>歩数</label>
+  <input type="number" id="steps" inputmode="numeric" placeholder="8000">
+
+  <label>ジム</label>
+  <div class="seg" id="gym">
+    <button data-v="✅">✅</button><button data-v="⛔">⛔</button><button data-v="🛌">🛌</button>
+  </div>
+
+  <label>簿記</label>
+  <div class="seg" id="boki">
+    <button data-v="✅">✅</button><button data-v="⛔">⛔</button><button data-v="🛌">🛌</button>
+  </div>
+
+  <label>没頭スコア（1-10）</label>
+  <div class="score" id="score"></div>
+
+  <button id="submit">送信してcommit</button>
+  <div id="msg"></div>
+</section>
+
+<!-- ===== KPIビュー ===== -->
+<section id="viewKpi" hidden>
+  <div id="kpiBody"><div class="muted">「KPI」を開くと読み込みます…</div></div>
+</section>
 
 <dialog id="cfg">
   <h3 style="margin:0 0 4px">GitHubトークン設定</h3>
   <p>Fine-grained PAT（repo=shukanka-system / Contents=Read and write）を貼り付け。この端末のブラウザ内にのみ保存されます。</p>
   <input type="password" id="pat" placeholder="github_pat_..." autocomplete="off">
-  <div class="row">
+  <div class="drow">
     <button id="cfgCancel">閉じる</button>
     <button class="primary" id="cfgSave">保存</button>
   </div>
@@ -94,6 +129,8 @@
 
 <script>
 const OWNER="komatsuhiroki28-cloud", REPO="shukanka-system";
+const DATA_OWNER=OWNER, DATA_REPO=REPO;
+const WEIGHT_START=96, WEIGHT_GOAL=78, GOAL_DATE="2026-12-06"; // 12月大会
 const $=s=>document.querySelector(s);
 const state={gym:null,boki:null,score:null};
 
@@ -103,11 +140,10 @@ const pad=n=>String(n).padStart(2,'0');
 const dateStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 $("#dateLbl").textContent=dateStr;
 
-// 没頭スコア 1-10 生成
+// 没頭スコア 1-10
 const sc=$("#score");
 for(let i=1;i<=10;i++){const b=document.createElement("button");b.textContent=i;b.dataset.v=i;sc.appendChild(b);}
 
-// セグメント選択
 function bindSeg(id,key){
   document.querySelectorAll(`#${id} button`).forEach(b=>{
     b.onclick=()=>{document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove("on"));
@@ -116,40 +152,165 @@ function bindSeg(id,key){
 }
 bindSeg("gym","gym");bindSeg("boki","boki");bindSeg("score","score");
 
-// 設定ダイアログ
+// 設定
 $("#gear").onclick=()=>{$("#pat").value=localStorage.getItem("pat")||"";$("#cfg").showModal();};
 $("#cfgCancel").onclick=()=>$("#cfg").close();
 $("#cfgSave").onclick=()=>{localStorage.setItem("pat",$("#pat").value.trim());$("#cfg").close();toast("トークンを保存","ok");};
 
 function toast(t,cls){const m=$("#msg");m.textContent=t;m.className=cls||"";}
 function b64(str){return btoa(String.fromCharCode(...new TextEncoder().encode(str)));}
+function authH(token){return {Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};}
+function getToken(){return (localStorage.getItem("pat")||"").trim();}
 
+// ===== タブ切替 =====
+let kpiLoaded=false;
+function showTab(which){
+  const inp=which==="input";
+  $("#tabInput").classList.toggle("on",inp);
+  $("#tabKpi").classList.toggle("on",!inp);
+  $("#viewInput").hidden=!inp;
+  $("#viewKpi").hidden=inp;
+  if(!inp){ loadKpi(); }
+}
+$("#tabInput").onclick=()=>showTab("input");
+$("#tabKpi").onclick=()=>showTab("kpi");
+
+// ===== 入力送信 =====
 $("#submit").onclick=async()=>{
-  const token=(localStorage.getItem("pat")||"").trim();
+  const token=getToken();
   if(!token){toast("先に⚙でトークンを設定してください","err");$("#cfg").showModal();return;}
   const wake=$("#wake").value, sleep=$("#sleep").value, weight=$("#weight").value, steps=$("#steps").value;
   if(!wake||!sleep||!weight||!steps||!state.gym||!state.boki||!state.score){
     toast("未入力の項目があります","err");return;}
   // 列順の正: 日付|起床|体重|歩数|ジム|簿記|没頭|睡眠
-  // ※体重は必ずindex2に固定。体重自動反映script(sync_weight_to_ledger.py)がparts[2]を体重として読むため、
-  //   新項目は末尾に追加すること（中間挿入は台帳汚染を招く）。
+  // ※体重は必ずindex2に固定（体重自動反映scriptがparts[2]を体重として読む）。新項目は末尾追加。
   const line=`${dateStr} | ${wake} | ${weight} | ${steps} | ${state.gym} | ${state.boki} | ${state.score} | ${sleep}`;
   const path=`logs/${dateStr}.txt`;
   const api=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
-  const H={Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  const H=authH(token);
   $("#submit").disabled=true;toast("送信中…","");
   try{
-    // 既存確認（同日再送で上書きするため sha を取得）
     let sha;
     const g=await fetch(api,{headers:H});
     if(g.status===200){sha=(await g.json()).sha;}
     const r=await fetch(api,{method:"PUT",headers:H,
       body:JSON.stringify({message:`log ${dateStr}`,content:b64(line),...(sha?{sha}:{})})});
-    if(r.ok){toast(sha?"上書き完了 ✅":"commit完了 ✅","ok");}
+    if(r.ok){toast(sha?"上書き完了 ✅":"commit完了 ✅","ok");kpiLoaded=false;}
     else{const e=await r.json();toast("失敗: "+(e.message||r.status),"err");}
   }catch(e){toast("通信エラー: "+e.message,"err");}
   finally{$("#submit").disabled=false;}
 };
+
+// ===== KPI: logs取得＆解析 =====
+function parseLog(name,text){
+  const date=name.replace(/\.txt$/,"");
+  let weight=null,gym=null,boki=null;
+  const t=text.trim();
+  if(t.includes("|")){
+    const line=t.split("\n").find(l=>/\d{4}-\d{2}-\d{2}/.test(l))||t;
+    const p=line.split("|").map(s=>s.trim());
+    // 日付|起床|体重|歩数|ジム|簿記|没頭|睡眠
+    weight=parseFloat(p[2]); gym=p[4]; boki=p[5];
+  }else{
+    const g=re=>{const m=t.match(new RegExp(re));return m?m[1].trim():null;};
+    const w=g("体重[：:]\\s*([0-9.]+)"); weight=w?parseFloat(w):null;
+    gym=g("ジム[^：:\\n]*[：:]\\s*([^\\n]+)");
+    boki=g("簿記[^：:\\n]*[：:]\\s*([^\\n]+)");
+  }
+  const done=v=>{v=(v||"").trim();return v==="✅"||v==="done"||/完了/.test(v);};
+  const off=v=>{v=(v||"").trim();return v==="🛌"||/オフ/.test(v);};
+  return {date, weight:isNaN(weight)?null:weight, gymDone:done(gym), gymOff:off(gym), bokiDone:done(boki), bokiOff:off(boki)};
+}
+
+async function loadKpi(force){
+  if(kpiLoaded && !force) return;
+  const body=$("#kpiBody");
+  const token=getToken();
+  if(!token){ body.innerHTML=`<div class="muted">⚙でトークンを設定すると<br>KPI進捗を表示します。</div>`; return; }
+  body.innerHTML=`<div class="muted">読み込み中…</div>`;
+  try{
+    const H=authH(token);
+    const list=await fetch(`https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/logs`,{headers:H});
+    if(!list.ok) throw new Error("logs一覧取得失敗 ("+list.status+")");
+    const files=(await list.json()).filter(f=>f.name.endsWith(".txt")).sort((a,b)=>a.name<b.name?-1:1);
+    const rawH={...H,Accept:"application/vnd.github.raw"};
+    const entries=[];
+    for(const f of files){
+      const r=await fetch(`https://api.github.com/repos/${DATA_OWNER}/${DATA_REPO}/contents/logs/${f.name}`,{headers:rawH});
+      if(r.ok){ entries.push(parseLog(f.name,await r.text())); }
+    }
+    renderKpi(entries);
+    kpiLoaded=true;
+  }catch(e){ body.innerHTML=`<div class="muted" style="color:var(--warn)">読み込みエラー: ${e.message}</div>`; }
+}
+
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+
+function renderKpi(entries){
+  const withW=entries.filter(e=>e.weight!=null);
+  const latest=withW.length?withW[withW.length-1]:null;
+  const cur=latest?latest.weight:null;
+  // 肉体
+  let bodyCard;
+  if(cur!=null){
+    const prog=Math.max(0,Math.min(100,(WEIGHT_START-cur)/(WEIGHT_START-WEIGHT_GOAL)*100));
+    const remain=(cur-WEIGHT_GOAL);
+    const dleft=daysBetween(dateStr,GOAL_DATE);
+    const weeks=Math.max(0.1,dleft/7);
+    const need=(remain/weeks);
+    // 実ペース（直近2点）
+    let paceTxt="", paceCls="amber";
+    if(withW.length>=2){
+      const p0=withW[withW.length-2], p1=latest;
+      const dd=daysBetween(p0.date,p1.date);
+      if(dd>0){ const wk=(p0.weight-p1.weight)/(dd/7);
+        paceCls = wk>=need? "ok":"warn";
+        paceTxt=`実測ペース ${wk>=0?"−":"+"}${Math.abs(wk).toFixed(2)}kg/週（必要 −${need.toFixed(2)}）`;
+      }
+    }
+    bodyCard=`
+    <div class="kpi-card">
+      <div class="kpi-head"><div class="t">💪 肉体資本</div><div class="tag">12月大会</div></div>
+      <div class="big">${cur.toFixed(1)}<small>kg / 目標 ${WEIGHT_GOAL}</small></div>
+      <div class="bar"><i style="width:${prog.toFixed(1)}%"></i></div>
+      <div class="row">
+        <div class="stat"><div class="k">達成率</div><div class="v ok">${prog.toFixed(0)}%</div></div>
+        <div class="stat"><div class="k">残り</div><div class="v">${remain.toFixed(1)}kg</div></div>
+        <div class="stat"><div class="k">大会まで</div><div class="v">${dleft}日</div></div>
+      </div>
+      ${paceTxt?`<div class="pace v ${paceCls}" style="font-weight:600">${paceTxt}</div>`:""}
+    </div>`;
+  }else{
+    bodyCard=`<div class="kpi-card"><div class="kpi-head"><div class="t">💪 肉体資本</div></div><div class="muted">体重データ待ち</div></div>`;
+  }
+  // 知的（簿記）
+  const bokiDays=entries.filter(e=>e.bokiDone).length;
+  const bokiLogged=entries.filter(e=>!e.bokiOff).length;
+  const bokiRate=bokiLogged?Math.round(bokiDays/bokiLogged*100):0;
+  let bokiStreak=0;
+  for(let i=entries.length-1;i>=0;i--){ if(entries[i].bokiOff)continue; if(entries[i].bokiDone)bokiStreak++; else break; }
+  const gymDays=entries.filter(e=>e.gymDone).length;
+  const intelCard=`
+    <div class="kpi-card">
+      <div class="kpi-head"><div class="t">📗 知的資本</div><div class="tag">日商簿記1級</div></div>
+      <div class="big">${bokiDays}<small>日 実行</small></div>
+      <div class="row">
+        <div class="stat"><div class="k">連続</div><div class="v ok">${bokiStreak}日</div></div>
+        <div class="stat"><div class="k">実行率</div><div class="v">${bokiRate}%</div></div>
+        <div class="stat"><div class="k">ジム累計</div><div class="v">${gymDays}日</div></div>
+      </div>
+    </div>`;
+  // キャリア（マイルストーン）
+  const careerCard=`
+    <div class="kpi-card">
+      <div class="kpi-head"><div class="t">📈 キャリア資本</div><div class="tag">時価総額500億</div></div>
+      <div class="mile now"><div class="dot"></div><div><div class="mt">現在：経理マネージャー</div><div class="md">M&A財務・PMI実務</div></div></div>
+      <div class="mile"><div class="dot"></div><div><div class="mt">37歳：シリーズA CFO 就任</div><div class="md">ベンチャーCFOへ</div></div></div>
+      <div class="mile"><div class="dot"></div><div><div class="mt">45歳：IPO 達成</div><div class="md">上場</div></div></div>
+    </div>`;
+  $("#kpiBody").innerHTML=bodyCard+intelCard+careerCard+
+    `<div class="muted" style="padding:8px 0 0;font-size:11px">記録 ${entries.length}件を集計 / ${dateStr} 時点</div>`;
+}
 </script>
 </body>
 </html>
