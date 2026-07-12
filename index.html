@@ -57,6 +57,9 @@
 <label>起床時刻</label>
 <input type="time" id="wake">
 
+<label>睡眠スコア（0-100）</label>
+<input type="number" id="sleep" inputmode="numeric" placeholder="82">
+
 <label>体重</label>
 <input type="number" id="weight" inputmode="decimal" step="0.1" placeholder="94.7">
 
@@ -124,10 +127,10 @@ function b64(str){return btoa(String.fromCharCode(...new TextEncoder().encode(st
 $("#submit").onclick=async()=>{
   const token=(localStorage.getItem("pat")||"").trim();
   if(!token){toast("先に⚙でトークンを設定してください","err");$("#cfg").showModal();return;}
-  const wake=$("#wake").value, weight=$("#weight").value, steps=$("#steps").value;
-  if(!wake||!weight||!steps||!state.gym||!state.boki||!state.score){
+  const wake=$("#wake").value, sleep=$("#sleep").value, weight=$("#weight").value, steps=$("#steps").value;
+  if(!wake||!sleep||!weight||!steps||!state.gym||!state.boki||!state.score){
     toast("未入力の項目があります","err");return;}
-  const line=`${dateStr} | ${wake} | ${weight} | ${steps} | ${state.gym} | ${state.boki} | ${state.score}`;
+  const line=`${dateStr} | ${wake} | ${sleep} | ${weight} | ${steps} | ${state.gym} | ${state.boki} | ${state.score}`;
   const path=`logs/${dateStr}.txt`;
   const api=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
   const H={Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
