@@ -130,7 +130,10 @@ $("#submit").onclick=async()=>{
   const wake=$("#wake").value, sleep=$("#sleep").value, weight=$("#weight").value, steps=$("#steps").value;
   if(!wake||!sleep||!weight||!steps||!state.gym||!state.boki||!state.score){
     toast("未入力の項目があります","err");return;}
-  const line=`${dateStr} | ${wake} | ${sleep} | ${weight} | ${steps} | ${state.gym} | ${state.boki} | ${state.score}`;
+  // 列順の正: 日付|起床|体重|歩数|ジム|簿記|没頭|睡眠
+  // ※体重は必ずindex2に固定。体重自動反映script(sync_weight_to_ledger.py)がparts[2]を体重として読むため、
+  //   新項目は末尾に追加すること（中間挿入は台帳汚染を招く）。
+  const line=`${dateStr} | ${wake} | ${weight} | ${steps} | ${state.gym} | ${state.boki} | ${state.score} | ${sleep}`;
   const path=`logs/${dateStr}.txt`;
   const api=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
   const H={Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
